@@ -8,8 +8,10 @@ Maneja una lista de tuples con la informacion del item y la cantidad
 
 class Order:
     def __init__(self, emisor):
+        self.monto = None
         self.orderList = []
         self.emisor = emisor
+
 
     def addItem(self, itemStr, quantity):
         self.orderList.append((itemStr, quantity))

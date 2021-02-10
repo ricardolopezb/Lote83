@@ -1,12 +1,13 @@
 import tkinter as tk
-
+from datetime import datetime
 from chatbot import Chatbot
-
+from excel import Excel
 from functools import partial
 
 
 class Window:
     bot = Chatbot()
+    exc = Excel()
 
     def __init__(self, title):
         self.win = tk.Tk()
@@ -16,6 +17,7 @@ class Window:
 
     def enviarCommandFunction(self, order, entry):
         self.bot.sendMonto(order.emisor.get_id(), entry.get())
+        order.monto = entry.get()
 
 
 
@@ -53,10 +55,17 @@ class Window:
 
         tk.Label(frame, text=order.show_emisor_data()).grid(row=0, column=0, columnspan=3)  # Encabezado
         tk.Label(frame, text=order.show_items_as_str()).grid(row=1, column=0, columnspan=3)  # texto con pedido
-
-        tk.Button(frame, text="Cerrar Compra").grid(row=2, column=1)
+        date = datetime.today().strftime('%Y-%m-%d')
+        tk.Button(frame, text="Cerrar Compra", command=partial(self.cerrarCompra, date, order.emisor.lote, order.emisor.nombre, order.monto, frame)).grid(row=2, column=1)
         frame.grid(row=row, column=column, padx=(10, 10), pady=(10, 10))
         self.frameCount = self.frameCount + 1
+
+    def cerrarCompra(self, date, lote, nombre, monto, frame):
+        self.exc.addRow(date, lote, nombre, int(monto))
+        self.deleteDisplayOrder(frame)
+
+
+
 
     def deleteDisplayOrder(self, frame):
         #se usa para borrar el frame de la pending
