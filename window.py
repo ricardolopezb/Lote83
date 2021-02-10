@@ -1,11 +1,12 @@
 import tkinter as tk
 
-from emisor import Emisor
-from order import Order
+from chatbot import Chatbot
 
+from functools import partial
 
 
 class Window:
+    bot = Chatbot()
 
     def __init__(self, title):
         self.win = tk.Tk()
@@ -13,16 +14,26 @@ class Window:
         self.win.title(title)
         self.frameCount = 0
 
-    def createPendingOrderDisplay(self, order, row, column):
+    def enviarCommandFunction(self, order, entry):
+        self.bot.sendMonto(order.emisor.get_id(), entry.get())
+
+
+
+    def createPendingOrderDisplay(self, order, row, column, func):
         frame = tk.Frame(self.win, bd=3, relief="solid")
 
         tk.Label(frame, text=order.show_emisor_data()).grid(row=0, column=0, columnspan=3)  # Encabezado
         tk.Label(frame, text=order.show_items_as_str()).grid(row=1, column=0, columnspan=3)  # texto con pedido
 
         tk.Label(frame, text="Monto: ").grid(row=2, column=0)
-        tk.Entry(frame).grid(row=2, column=1)
-        tk.Button(frame, text="Enviar", cursor="man").grid(row=2, column=2)
-        tk.Button(frame, text="Preparado").grid(row=3, column=2, padx=(2,2), pady=(1,2))
+        entry = tk.Entry(frame)
+        entry.grid(row=2, column=1)
+
+        emisorId = order.emisor.get_id()
+
+        tk.Button(frame, text="Problema", command=partial(self.launchSupportWindow, emisorId)).grid(row=3, column=1)
+        tk.Button(frame, text="Enviar", command=partial(self.enviarCommandFunction, order, entry)).grid(row=2, column=2)
+        tk.Button(frame, text="Preparado", command=partial(func, order, frame)).grid(row=3, column=2, padx=(2,2), pady=(1,2))
 
 
         frame.grid(row=row, column=column, padx=(10, 10), pady=(10,10))
@@ -45,6 +56,7 @@ class Window:
 
         tk.Button(frame, text="Cerrar Compra").grid(row=2, column=1)
         frame.grid(row=row, column=column, padx=(10, 10), pady=(10, 10))
+        self.frameCount = self.frameCount + 1
 
     def deleteDisplayOrder(self, frame):
         #se usa para borrar el frame de la pending
@@ -55,30 +67,27 @@ class Window:
     def mainloop(self):
         self.win.mainloop()
 
-"""
-root = Window("test")
+    def launchSupportWindow(self, chatId):
+        suppWin = tk.Tk()
+        suppWin.geometry("695x415")
+        suppWin.title('Mensaje de Error')
+
+        textBox = tk.Text(suppWin)
+        textBox.pack(side=tk.LEFT)
 
 
-order = Order(Emisor("Carlos", 192))
-order.addItem("droga", 5)
-order.addItem("paco", 1)
+        sendButton = tk.Button(suppWin, text="Enviar", height="400" ,command=partial(self.supportButton, chatId, textBox))
+        sendButton.pack(side=tk.RIGHT)
 
-order2 = Order(Emisor("Juan", 100))
-order2.addItem("pera", 3)
-order2.addItem("manzana", 5)
+        suppWin.mainloop()
 
-order3 = Order(Emisor("Camila", 145))
-order3.addItem("Club Social", 50)
-order3.addItem("Mogul Extreme", 45)
+    def supportButton(self, chatId, textbox):
+        message = self.getText(textbox)
+        self.bot.send_message(chatId, message)
 
 
-root.createPendingOrderDisplay(order, 0, 0)
-root.createPreparedOrderDisplay(order2, 1, 0)
+    def getText(self, textBox):
+        return textBox.get("1.0", "end-1c")
 
 
-root.createPendingOrderDisplay(order3, 0, 2)
-
-
-root.mainloop()
-"""
 

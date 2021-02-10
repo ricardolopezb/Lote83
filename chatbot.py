@@ -37,3 +37,9 @@ class Chatbot:
         url = self.baseLink + ("/deleteMessage?chat_id={}&message_id={}").format(chatId, messageId)
         requests.get(url)
 
+    def sendMonto(self, chatId, monto):
+        reply = "El monto de su compra es de $" + monto
+        url = self.baseLink + ("/sendMessage?chat_id={}&text={}".format(chatId, reply))
+        requests.get(url)
+
+

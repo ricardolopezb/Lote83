@@ -51,17 +51,18 @@ class WindowManager:
         self.preparadas.mainloop()
 
 
-    def moveFrame(self, order):
-        self.pendientes.deleteDisplayOrder(order)
+    def moveFrame(self, order, frame):
+        self.pendientes.deleteDisplayOrder(frame)
         where = self.findSlot(self.preparadas)
-        self.preparadas.createPreparedOrder(order, where[0], where[1])
+        self.preparadas.createPreparedOrderDisplay(order, where[0], where[1])
         self.bot.send_prepared(order.emisor.get_id())
 
 
 
     def add_ordenPendiente(self, order):
         where = self.findSlot(self.pendientes)
-        self.pendientes.createPendingOrderDisplay(order, where[0], where[1])
+        func = self.moveFrame
+        self.pendientes.createPendingOrderDisplay(order, where[0], where[1], func)
         self.pendientes.win.update()
         winsound.Beep(440, 1000)
 
